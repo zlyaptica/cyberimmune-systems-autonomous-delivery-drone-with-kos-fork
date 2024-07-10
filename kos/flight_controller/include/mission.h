@@ -52,3 +52,4 @@ struct MissionCommand {
 
 int parseMission(char* response);
 void printMission();
+uint32_t getNextCommandNumByType(uint32_t waypoint, char type);
