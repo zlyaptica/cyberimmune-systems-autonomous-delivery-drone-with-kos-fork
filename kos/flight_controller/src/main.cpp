@@ -51,8 +51,8 @@ void getPointsBetween2Waypoints(float x1, float y1, float x2, float y2, float *l
         float x_m = (x1 + lambda * x2) / (1 + lambda);
         float y_m = (y1 + lambda * y2) / (1 + lambda);
 
-        latitudeCoordinates[POINTS_IN_BETWEEN - i] = x_m;
-        longitudeCoordinates[POINTS_IN_BETWEEN - i] = y_m;
+        latitudeCoordinates[i] = x_m;
+        longitudeCoordinates[i] = y_m;
     }
 }
 
@@ -543,7 +543,7 @@ int main(void)
             }
 
             float dToN = getDistanceToPoint(currentDroneCoordinates.latitude, currentDroneCoordinates.longitude, nextWaypointCoordinates.latitude, nextWaypointCoordinates.longitude);
-            fprintf(stderr, "[%s] Info: prev coordinates: %f %f. Go to %d  waypoint.\n", ENTITY_NAME, previousWaypointCoordinates.latitude, previousWaypointCoordinates.longitude, currentWaypoint);
+            fprintf(stderr, "[%s] Info: dToN %f, prev coordinates: %f %f. Go to %d  waypoint.\n", ENTITY_NAME, dToN, previousWaypointCoordinates.latitude, previousWaypointCoordinates.longitude, currentWaypoint);
             fprintf(stderr, "[%s] Info: next coordinates: %f %f\n", ENTITY_NAME, nextWaypointCoordinates.latitude, nextWaypointCoordinates.longitude);
 
             if (dToN <= WAYPOINT_RADIUS)
