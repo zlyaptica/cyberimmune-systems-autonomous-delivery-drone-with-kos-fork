@@ -42,6 +42,9 @@ build
 
 *.zip
 
+kos/cross-build-*
+kos/build_*
+
 *.deb
 # Ignore IDE files.
 .vscode/
