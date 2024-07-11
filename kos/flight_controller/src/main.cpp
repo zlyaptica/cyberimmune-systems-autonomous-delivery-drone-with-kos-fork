@@ -369,7 +369,7 @@ int main(void)
 
             // if (currentWaypoint == currentDropCargoWaypoint - 1) // если до сброса груза нам остался один вейпоинт, то мы снижаем скорость
             // {
-            //     fprintf(stderr, "[%s] Warning: The drone is flying too high and landing: %f m. Trying to lower the altitude\n", ENTITY_NAME, currentDroneCoordinates.altitude);
+            //     fprintf(stderr, "[%s] Info: drone landing for drop cargo to %f m. Trying to lower the altitude\n", ENTITY_NAME, currentDroneCoordinates.altitude);
             //     if (!changeAltitude(DROP_CARGO_ALTITUDE))
             //     {
             //         fprintf(stderr, "[%s] Warning: Can not change altitude\n", ENTITY_NAME);
@@ -381,7 +381,6 @@ int main(void)
             //     changeAltitude(70);
             // }
 
-            // if (currentWaypoint == )
 
             // if there are less than 10 meters to the load dumping point, the load can be dumped
             if (currentDropCargoWaypoint == reachedWaypoint + 2)
