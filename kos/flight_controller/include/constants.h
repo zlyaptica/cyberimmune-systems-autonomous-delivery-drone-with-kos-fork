@@ -4,7 +4,7 @@
 const int POINTS_IN_BETWEEN = 22; // количество точек между вейпоинтами с учетом самих вейпоинтов
 const double WAYPOINT_RADIUS = 4.0;
 const float MAXIMUM_DRONE_SPEED = 2.5;
-const float MAX_DRONE_ALTITUDE = 250;
+const float MAX_DRONE_ALTITUDE = 150;
 const float DROP_CARGO_ALTITUDE = 70;
 
 
