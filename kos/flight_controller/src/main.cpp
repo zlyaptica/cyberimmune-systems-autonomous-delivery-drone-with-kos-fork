@@ -293,13 +293,13 @@ int main(void)
         }
         else
         {
-            if (currentWaypoint == commandNum - 1)
-            {
-                if (!setKillSwitch(0))
-                {
-                    fprintf(stderr, "[%s] Warning: Could not kill switch\n", ENTITY_NAME);
-                }
-            }
+            // if (currentWaypoint == commandNum - 1)
+            // {
+            //     if (!setKillSwitch(0))
+            //     {
+            //         fprintf(stderr, "[%s] Warning: Could not kill switch\n", ENTITY_NAME);
+            //     }
+            // }
 
             pointCoordinates previousDroneCoordinates;
 
@@ -433,6 +433,12 @@ int main(void)
                 {
                     fprintf(stderr, "[%s] Info: Succesfully change drone altitude to %f.\n", ENTITY_NAME, MAX_DRONE_ALTITUDE);
                 }
+            }
+
+            if (currentDroneCoordinates.altitude > MAX_DRONE_ALTITUDE + 150)
+            {
+                fprintf(stderr, "[%s] Warning: TAltitude kill switch: %f m. Trying to lower the altitude\n", ENTITY_NAME, currentDroneCoordinates.altitude);
+                setKillSwitch(0);
             }
 
             // control horizontal speed
