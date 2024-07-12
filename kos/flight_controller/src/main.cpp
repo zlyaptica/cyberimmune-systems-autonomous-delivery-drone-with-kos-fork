@@ -33,11 +33,6 @@ struct pointCoordinates // координаты точки float типа
     float altitude;
 };
 
-// const double WAYPOINT_RADIUS = 2.0;
-// const int POINTS_IN_BETWEEN = 22;
-// const float MAXIMUM_DRONE_SPEED = 5.5;
-// const float MAX_DRONE_ALTITUDE = 500;
-
 void getPointsBetween2Waypoints(float x1, float y1, float x2, float y2, float *latitudeCoordinates, float *longitudeCoordinates)
 {
     latitudeCoordinates[0] = x1;
@@ -394,7 +389,7 @@ int main(void)
                 fprintf(stderr, "[%s] Warning: The drone's flying too fast: %f(max: %f). Trying to slow down.\n", ENTITY_NAME, currentHorizontalDroneSpeed, MAXIMUM_DRONE_SPEED);
                 currentMaximumDroneSpeed = currentHorizontalDroneSpeed;
 
-                if (!changeSpeed(MAXIMUM_DRONE_SPEED))
+                if (!changeSpeed(2))
                 {
                     fprintf(stderr, "[%s] Warning: Speed change error\n", ENTITY_NAME);
 
