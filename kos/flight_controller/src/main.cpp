@@ -76,8 +76,8 @@ bool isInsideTheBorders(float currentLatitude, float currentLongitude, float *la
     for (int i = 1; i < POINTS_IN_BETWEEN; i++)
     {
         distance = getDistanceToPoint(currentLatitude, currentLongitude, latitudeCoordinates[i], longitudeCoordinates[i]);
-        fprintf(stderr, "i = %d. distance = %f. cur lat = %f, cur long = %f, lat coord = %f, long coord = %f\n", i, distance, currentLatitude, currentLongitude, latitudeCoordinates[i], longitudeCoordinates[i]);
-        if (distance < 5)
+        // fprintf(stderr, "i = %d. distance = %f. cur lat = %f, cur long = %f, lat coord = %f, long coord = %f\n", i, distance, currentLatitude, currentLongitude, latitudeCoordinates[i], longitudeCoordinates[i]);
+        if (distance < 3)
             return true;
     }
     return false;
@@ -230,27 +230,7 @@ int main(void)
 
     // If we get here, the drone is able to arm and start the mission
     // The flight is need to be controlled from now on
-    // Also we need to check on ORVD, whether the flight is still allowed or it is need to be paused
-
-    // Security security = Security(commandNum, commands);
-    // fprintf(stderr, "[%s] PERED STARTOM\n", ENTITY_NAME);
-
-    // bool isDroneFlying = false;
-    // while (true)
-    // {
-    //     if (!isDroneFlying)
-    //     {
-    //         if (security.isDroneFlying())
-    //         {
-    //             isDroneFlying = true;
-    //         }
-    //         else
-    //         {
-    //             continue;
-    //         }
-    //     }
-    //     security.secure();
-    // }
+    // Also we need to check on ORVD, whether the flight is still allowed or it is need to be paused    
 
     printMission();
     int32_t reachedWaypoint = 0; // вейпонт, который пролетел дрон
@@ -307,6 +287,7 @@ int main(void)
     float altitudeDifference = 0;       // разница высота за тик для вычисления вертикальной скорости. Рассчитывается как разница между текущей высотой и значением данной переменной
 
     pointCoordinates currentDroneCoordinates;
+    bool isPauseFlight = false;
 
     while (currentWaypoint != commandNum)
     {
@@ -348,6 +329,7 @@ int main(void)
 
             float currentHorizontalDroneSpeed;
             float currentVerticalDroneSpeed;
+
             if (elapsedTime > 0)
             {
                 currentHorizontalDroneSpeed = travelledDistancePerTick / elapsedTime;
@@ -365,26 +347,10 @@ int main(void)
             // control cargo lock
             uint32_t currentDropCargoWaypoint = getNextCommandNumByType(0, 'S');
 
-            // if (currentWaypoint == currentDropCargoWaypoint - 1) // если до сброса груза нам остался один вейпоинт, то мы снижаем скорость
-            // {
-            //     fprintf(stderr, "[%s] Warning: The drone is flying too high and landing: %f m. Trying to lower the altitude\n", ENTITY_NAME, currentDroneCoordinates.altitude);
-            //     if (!changeAltitude(DROP_CARGO_ALTITUDE))
-            //     {
-            //         fprintf(stderr, "[%s] Warning: Can not change altitude\n", ENTITY_NAME);
-            //     }
-            //     else
-            //     {
-            //         fprintf(stderr, "[%s] Info: Succesfully change drone altitude to %f for drop cargo.\n", ENTITY_NAME, MAX_DRONE_ALTITUDE);
-            //     }
-            //     changeAltitude(70);
-            // }
-
-            // if (currentWaypoint == )
-
             if (currentDropCargoWaypoint != commandNum)
             {
                 // if there are less than 10 meters to the load dumping point, the load can be dumped
-                if (currentDropCargoWaypoint == reachedWaypoint + 2 || currentDropCargoWaypoint == reachedWaypoint - 1)
+                if (currentDropCargoWaypoint == reachedWaypoint + 2)
                 {
                     if (!setCargoLock(1))
                     {
@@ -395,44 +361,33 @@ int main(void)
                         fprintf(stderr, "[%s] Info: Success unlock the cargo\n", ENTITY_NAME);
                     }
                 }
-                else
-                {
-                    if (!setCargoLock(0))
-                    {
-                        fprintf(stderr, "[%s] Warning: Unable to lock the cargo\n", ENTITY_NAME);
-                    }
-                    else
-                    {
-                        fprintf(stderr, "[%s] Info: Success lock the cargo\n", ENTITY_NAME);
-                    }
-                }
             }
 
             // control horizontal speed
-            if (currentHorizontalDroneSpeed > MAXIMUM_DRONE_SPEED && currentMaximumDroneSpeed > currentHorizontalDroneSpeed)
-            {
-                fprintf(stderr, "[%s] Warning: The drone's flying too fast: %f(max: %f). Pause flight...\n", ENTITY_NAME, currentHorizontalDroneSpeed, MAXIMUM_DRONE_SPEED);
+            // if (currentHorizontalDroneSpeed > MAXIMUM_DRONE_SPEED && currentMaximumDroneSpeed > currentHorizontalDroneSpeed)
+            // {
+            //     fprintf(stderr, "[%s] Warning: The drone's flying too fast: %f(max: %f). Pause flight...\n", ENTITY_NAME, currentHorizontalDroneSpeed, MAXIMUM_DRONE_SPEED);
 
-                // try to lock drop cargo
-                if (!setCargoLock(0))
-                {
-                    fprintf(stderr, "[%s] Warning: Can not lock drop cargo\n", ENTITY_NAME);
-                }
-                else
-                {
-                    fprintf(stderr, "[%s] Info: Succesfully lock drop cargo\n", ENTITY_NAME);
-                }
+            //     // try to lock drop cargo
+            //     if (!setCargoLock(0))
+            //     {
+            //         fprintf(stderr, "[%s] Warning: Can not lock drop cargo\n", ENTITY_NAME);
+            //     }
+            //     else
+            //     {
+            //         fprintf(stderr, "[%s] Info: Succesfully lock drop cargo\n", ENTITY_NAME);
+            //     }
 
-                // try to pause flight
-                if (!pauseFlight())
-                {
-                    fprintf(stderr, "[%s] Warning: Can not pause flight\n", ENTITY_NAME);
-                }
-                else
-                {
-                    fprintf(stderr, "[%s] Info: Succesfully pause flight\n", ENTITY_NAME);
-                }
-            }
+            //     // try to pause flight
+            //     if (!pauseFlight())
+            //     {
+            //         fprintf(stderr, "[%s] Warning: Can not pause flight\n", ENTITY_NAME);
+            //     }
+            //     else
+            //     {
+            //         fprintf(stderr, "[%s] Info: Succesfully pause flight\n", ENTITY_NAME);
+            //     }
+            // }
 
             if (currentHorizontalDroneSpeed > MAXIMUM_DRONE_SPEED)
             {
@@ -470,32 +425,14 @@ int main(void)
             }
 
             // control altitude
-            if (currentDroneCoordinates.altitude > MAX_DRONE_ALTITUDE)
+            if (currentDroneCoordinates.altitude > MAX_DRONE_ALTITUDE + 30)
             {
                 fprintf(stderr, "[%s] Warning: The drone is flying too high and landing: %f m. Trying to lower the altitude\n", ENTITY_NAME, currentDroneCoordinates.altitude);
                 if (!changeAltitude(MAX_DRONE_ALTITUDE))
                 {
                     fprintf(stderr, "[%s] Warning: Can not change altitude\n", ENTITY_NAME);
 
-                    // try to lock drop cargo
-                    if (!setCargoLock(0))
-                    {
-                        fprintf(stderr, "[%s] Warning: Can not lock drop cargo\n", ENTITY_NAME);
-                    }
-                    else
-                    {
-                        fprintf(stderr, "[%s] Info: Succesfully lock drop cargo\n", ENTITY_NAME);
-                    }
-
-                    // try to pause flight
-                    if (!pauseFlight())
-                    {
-                        fprintf(stderr, "[%s] Warning: Can not pause flight\n", ENTITY_NAME);
-                    }
-                    else
-                    {
-                        fprintf(stderr, "[%s] Info: Succesfully pause flight\n", ENTITY_NAME);
-                    }
+                    setKillSwitch(0);
                 }
                 else
                 {
@@ -520,26 +457,7 @@ int main(void)
             if (!isInsideTheBorders(currentDroneCoordinates.latitude, currentDroneCoordinates.longitude, latitudeCoordinates, longitudeCoordinates))
             {
                 fprintf(stderr, "[%s] Warning: the drone's out of the corridor and landing.\n", ENTITY_NAME);
-
-                // try to lock drop cargo
-                if (!setCargoLock(0))
-                {
-                    fprintf(stderr, "[%s] Warning: Can not lock drop cargo\n", ENTITY_NAME);
-                }
-                else
-                {
-                    fprintf(stderr, "[%s] Info: Succesfully lock drop cargo\n", ENTITY_NAME);
-                }
-
-                // try to pause flight
-                if (!pauseFlight())
-                {
-                    fprintf(stderr, "[%s] Warning: Can not pause flight\n", ENTITY_NAME);
-                }
-                else
-                {
-                    fprintf(stderr, "[%s] Info: Succesfully pause flight\n", ENTITY_NAME);
-                }
+                setKillSwitch(0);
             }
 
             float dToN = getDistanceToPoint(currentDroneCoordinates.latitude, currentDroneCoordinates.longitude, nextWaypointCoordinates.latitude, nextWaypointCoordinates.longitude);

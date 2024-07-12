@@ -1,0 +1,174 @@
+entities:
+
+- name: drone_controller.AutopilotConnector
+  connections:
+  - target: drone_controller.PeripheryController
+    id: periphery_controller_connection
+  cmake_generated_connections:
+  - target: kl.drivers.BSP
+    id: kl.drivers.BSP
+  - target: kl.drivers.UART
+    id: kl.drivers.UART
+
+- name: drone_controller.CredentialManager
+  env:
+    VFS_FILESYSTEM_BACKEND: client:kl.VfsSdCardFs
+  connections:
+  - target: kl.VfsSdCardFs
+    id: kl.VfsSdCardFs
+  - target: drone_controller.ServerConnector
+    id: server_connector_connection
+
+
+- name: drone_controller.FlightController
+  connections:
+  - target: drone_controller.AutopilotConnector
+    id: autopilot_connector_connection
+  - target: drone_controller.CredentialManager
+    id: credential_manager_connection
+  - target: drone_controller.NavigationSystem
+    id: navigation_system_connection
+  - target: drone_controller.PeripheryController
+    id: periphery_controller_connection
+  - target: drone_controller.ServerConnector
+    id: server_connector_connection
+
+
+- name: drone_controller.NavigationSystem
+  connections:
+  - target: drone_controller.PeripheryController
+    id: periphery_controller_connection
+  - target: drone_controller.CredentialManager
+    id: credential_manager_connection
+  - target: drone_controller.ServerConnector
+    id: server_connector_connection
+  cmake_generated_connections:
+  - target: kl.drivers.BSP
+    id: kl.drivers.BSP
+  - target: kl.drivers.UART
+    id: kl.drivers.UART
+  - target: kl.drivers.I2C
+    id: kl.drivers.I2C
+
+
+- name: drone_controller.PeripheryController
+  connections:
+  - target: drone_controller.CredentialManager
+    id: credential_manager_connection
+  - target: drone_controller.ServerConnector
+    id: server_connector_connection
+  cmake_generated_connections:
+  - target: kl.drivers.BSP
+    id: kl.drivers.BSP
+  - target: kl.drivers.GPIO
+    id: kl.drivers.GPIO
+
+- name: drone_controller.ServerConnector
+  env:
+    VFS_FILESYSTEM_BACKEND: client:kl.VfsNet
+    VFS_NETWORK_BACKEND: client:kl.VfsNet
+  args:
+    - -sV4
+  connections:
+  - target: kl.VfsNet
+    id: kl.VfsNet
+  cmake_generated_connections:
+  - target: wpa.WpaSupplicant
+    id: wpa_supplicant
+
+
+- name: kl.drivers.BSP
+  path: bsp_hw
+
+- name: kl.drivers.UART
+  path: uart_hw
+  connections:
+  - target: kl.drivers.BSP
+    id: kl.drivers.BSP
+
+- name: kl.drivers.I2C
+  path: i2c_hw
+
+- name: kl.drivers.GPIO
+  path: gpio_hw
+
+- name: wpa.WpaSupplicant
+  path: wpa_supplicant
+  connections:
+  - target: kl.VfsNet
+    id: kl.VfsNet
+  args:
+    - '-dddddd'
+    - '-ien1'
+    - '-c/etc/wpa_supplicant.conf'
+  env:
+    VFS_FILESYSTEM_BACKEND: client:kl.VfsNet
+    VFS_NETWORK_BACKEND: client:kl.VfsNet
+
+- name: kl.VfsNet
+  path: VfsNet
+  connections:
+  - target: kl.EntropyEntity
+    id: kl.EntropyEntity
+
+  - target: kl.drivers.DNetSrv
+    id: kl.drivers.DNet
+  args:
+    - -l
+    - devfs /dev devfs rw
+    - -l
+    - ramfs /tmp ramfs rw
+    - -l
+    - romfs /etc romfs ro
+  env:
+        VFS_NETWORK_BACKEND: server:kl.VfsNet
+        VFS_FILESYSTEM_BACKEND: server:kl.VfsNet
+        DEFAULT_DNS_SERVER: 8.8.8.8
+
+- name: kl.rump.Dhcpcd
+  path: dhcpcd_entity
+  connections:
+  - target: kl.VfsNet
+    id: kl.VfsNet
+  args:
+    - '-4'
+    - -f
+    - /etc/dhcpcd.conf
+  env:
+    VFS_FILESYSTEM_BACKEND: client:kl.VfsNet
+    VFS_NETWORK_BACKEND: client:kl.VfsNet
+
+- name: kl.VfsSdCardFs
+  path: VfsSdCardFs
+  connections:
+  - target: kl.drivers.SDCard
+    id: kl.drivers.SDCard
+  - target: kl.EntropyEntity
+    id: kl.EntropyEntity
+
+  args:
+    - -l
+    - devfs /dev devfs 0
+  env:
+        ROOTFS: mmc0,0 / fat32 0
+        VFS_FILESYSTEM_BACKEND: server:kl.VfsSdCardFs
+
+- name: kl.EntropyEntity
+  path: Entropy
+
+- name: kl.drivers.DNetSrv
+  path: dnet_entity
+  connections:
+  - target: kl.drivers.Bcm2711MboxArmToVc
+    id: kl.drivers.Bcm2711MboxArmToVc
+
+
+- name: kl.drivers.SDCard
+  path: sdcard_hw
+  connections:
+  - target: kl.drivers.BSP
+    id: kl.drivers.BSP
+
+- name: kl.drivers.Bcm2711MboxArmToVc
+  path: bcm2711_mbox_arm2vc_hw
+
