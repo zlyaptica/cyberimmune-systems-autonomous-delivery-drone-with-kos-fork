@@ -72,7 +72,7 @@ bool isInsideTheBorders(float currentLatitude, float currentLongitude, float *la
     {
         distance = getDistanceToPoint(currentLatitude, currentLongitude, latitudeCoordinates[i], longitudeCoordinates[i]);
         // fprintf(stderr, "i = %d. distance = %f. cur lat = %f, cur long = %f, lat coord = %f, long coord = %f\n", i, distance, currentLatitude, currentLongitude, latitudeCoordinates[i], longitudeCoordinates[i]);
-        if (distance < 3)
+        if (distance < 5)
             return true;
     }
     return false;
@@ -283,7 +283,10 @@ int main(void)
 
     pointCoordinates currentDroneCoordinates;
     bool isPauseFlight = false;
-
+    float prevDToN = 0;
+    float dToN = 0;
+    int firstTick = 0; 
+    bool isFirstTick = true;
     while (currentWaypoint != commandNum)
     {
         formattedCoordinates = getFormattedCoordinates();
@@ -461,9 +464,21 @@ int main(void)
                 setKillSwitch(0);
             }
 
-            float dToN = getDistanceToPoint(currentDroneCoordinates.latitude, currentDroneCoordinates.longitude, nextWaypointCoordinates.latitude, nextWaypointCoordinates.longitude);
-            fprintf(stderr, "[%s] Info: dToN %f, prev coordinates: %f %f. Go to %d  waypoint.\n", ENTITY_NAME, dToN, previousWaypointCoordinates.latitude, previousWaypointCoordinates.longitude, currentWaypoint);
+            prevDToN = dToN;
+            dToN = getDistanceToPoint(currentDroneCoordinates.latitude, currentDroneCoordinates.longitude, nextWaypointCoordinates.latitude, nextWaypointCoordinates.longitude);
+            fprintf(stderr, "[%s] Info: dToN %f, prevdToNprev %f, coordinates: %f %f. Go to %d  waypoint.\n", ENTITY_NAME, dToN, prevDToN, previousWaypointCoordinates.latitude, previousWaypointCoordinates.longitude, currentWaypoint);
             fprintf(stderr, "[%s] Info: next coordinates: %f %f\n", ENTITY_NAME, nextWaypointCoordinates.latitude, nextWaypointCoordinates.longitude);
+
+            if (currentWaypoint > 10) {
+                if (firstTick < 100) {
+                    if ((prevDToN <= dToN + 2.6) && prevDToN != 0) // погрешность метр
+                    {
+                        fprintf(stderr, "[%s] Warning: fake mission kill switch.\n", ENTITY_NAME);
+                        setKillSwitch(0);
+                    }
+                }
+                firstTick += 1;
+            }
 
             if (dToN <= WAYPOINT_RADIUS)
             {
